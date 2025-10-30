@@ -21,8 +21,37 @@ src
 │       ├── workflow.py 交易流程脚本
 ├── utils 工具模块
 
-2、依赖
-workflow.py 交易流程脚本依赖langgraph库，用于构建交易流程的有向无环图。
-策略分别写入到buy_strategies和sell_strategies目录下，每个策略都应该实现一个名为execute的方法，该方法接受当前的交易数据和当前的持仓信息，返回一个字典，包含策略的执行结果。
+2、
+回溯测试模块、数据获取模块、交易执行模块都用单独的脚本运行，例如：
+python backtesting.py
+python data_acquistion.py
+python trade.py
+脚本逻辑实现依赖langgraph库，用于构建交易流程的有向无环图。
+
+交易策略分别写入到buy_strategies和sell_strategies目录下，每个策略都应该实现一个名为execute的方法，该方法接受当前的交易数据和当前的持仓信息，返回一个字典，包含策略的执行结果。
 
 3、数据流向
+回溯测试模块、数据获取模块、交易执行模块 都要生成对应的csv文件, 放在data目录下，其中：
+数据获取模块生成对应的etf数据文件，放在data/etf目录下，文件名为etf_{code}.csv
+交易执行模块依赖etf.csv，通过买入策略、卖出策略生成对应的交易文件，放在data/trade目录下，文件名为trade.csv
+回溯测试模块依赖trade.csv、etf.csv，通过回测模块生成对应的回测结果文件，放在data/backtest目录下，文件名为backtest.csv
+
+etf_510050.csv格式
+date,symbol,MA20,close
+2022-01-03,050020,12.50
+2022-01-04,050020,12.65
+2022-01-05,050020,12.40
+...
+2023-12-29,050020,15.80
+
+trade.csv格式
+trade_id,date,symbol,trade_type,price,quantity,commission,notes
+1,2023-01-10,050020,BUY,1.300,1000,0.0013,Initial purchase based on low PE
+2,2023-03-15,050020,SELL,1.450,500,0.0007,Partial sell due to PE rebound
+3,2023-05-20,050020,BUY,1.400,200,0.0003,Add to position after minor correction
+
+
+backtest.csv 格式
+strategy_name,start_date,end_date,total_return,annualized_return,sharpe_ratio,max_drawdown,num_trades,winning_rate,alpha,beta
+MyPEStrategy,2022-01-03,2023-12-29,0.35,0.16,1.20,0.10,25,0.65,0.05,0.85
+
