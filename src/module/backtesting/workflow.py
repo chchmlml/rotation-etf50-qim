@@ -1,6 +1,6 @@
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
+# from __future__ import (absolute_import, division, print_function,
+#                         unicode_literals)
+import datetime
 import os, sys
 from matplotlib.style import available
 import numpy as np
@@ -185,8 +185,9 @@ def run():
     #             volume=5,
     #             openinterest=6)
 
+    path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     # 处理上证50数据
-    df1 = pd.read_csv("c:/result/上证50ETF.csv")
+    df1 = pd.read_csv(f"{path}/data/shangzheng50ETF.csv")
     df1.columns = ['datetime', 'close']
     df1['open'] = df1['close']
     df1['high'] = df1['close']
@@ -195,15 +196,21 @@ def run():
     df1['volume'] = 1000000
     df1['openinterest'] = 1000000
     df1.index = pd.to_datetime(df1["datetime"])
+    df1 = df1.sort_index()  # 按datetime升序排列
     df1 = df1[['open', 'high', "low", "close", "volume", 'openinterest']]
-    df1 = df1[df1.index >= pd.to_datetime("2011-09-20")]
+    # df1 = df1[df1.index >= pd.to_datetime("2011-09-20")]
     # print(df1.head())
-    feed = bt.feeds.PandasDirectData(dataname=df1)
+    feed = bt.feeds.PandasDirectData(dataname=df1,
+                                     # 数据必须大于fromdate
+                                     fromdate=datetime.datetime(2024, 11, 26),
+                                     # 数据必须小于todate
+                                     todate=datetime.datetime(2025, 11, 1),
+                                     reverse=False)
     # feed = bt.feeds.GenericCSVData(dataname = data_path,**data_kwargs)
     cerebro.adddata(feed, name="sz")
 
     # 处理创业板数据
-    df2 = pd.read_csv("易方达创业板ETF.csv")
+    df2 = pd.read_csv(f"{path}/data/chuangyebanETF.csv")
     df2.columns = ['datetime', 'close']
     df2['open'] = df2['close']
     df2['high'] = df2['close']
@@ -212,9 +219,15 @@ def run():
     df2['volume'] = 1000000
     df2['openinterest'] = 1000000
     df2.index = pd.to_datetime(df2["datetime"])
+    df2 = df2.sort_index()  # 按datetime升序排列
     df2 = df2[['open', 'high', "low", "close", "volume", 'openinterest']]
     # print(df2.head())
-    feed = bt.feeds.PandasDirectData(dataname=df2)
+    feed = bt.feeds.PandasDirectData(dataname=df2,
+                                     # 数据必须大于fromdate
+                                     fromdate=datetime.datetime(2024, 11, 26),
+                                     # 数据必须小于todate
+                                     todate=datetime.datetime(2025, 11, 1),
+                                     reverse=False)
     # feed = bt.feeds.GenericCSVData(dataname = data_path,**data_kwargs)
     cerebro.adddata(feed, name="cy")
 
@@ -258,6 +271,6 @@ if __name__ == "__main__":
         returns,
         positions=positions,
         transactions=transactions,
-        # gross_lev=gross_lev,
-        live_start_date='2020-01-01',
+        gross_lev=gross_lev,
+        live_start_date='2024-11-06',
     )
