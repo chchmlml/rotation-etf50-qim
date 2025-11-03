@@ -1,19 +1,10 @@
-# from __future__ import (absolute_import, division, print_function,
-#                         unicode_literals)
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import datetime
 import os, sys
-from matplotlib.style import available
-import numpy as np
 import pandas as pd
-
 import backtrader as bt  # backtrader
-# from backtrader.comminfo import ComminfoFuturesPercent,ComminfoFuturesFixed # 期货交易的手续费用，按照比例或者按照金额
-
-
-# from backtrader.plot.plot import run_cerebro_and_plot  # 个人编写，非backtrader自带
 import pyfolio as pf
-from multiprocessing import Pool
-from itertools import product
 
 
 # 策略逻辑：
@@ -28,7 +19,7 @@ from itertools import product
 
 class ETFStrategy(bt.Strategy):
     # 策略作者
-    author = 'yunjinqi'
+    # author = 'yunjinqi'
     # 策略的参数
     params = (("ma_period", 20),
               )
@@ -204,7 +195,7 @@ def run():
                                      # 数据必须大于fromdate
                                      fromdate=datetime.datetime(2024, 11, 26),
                                      # 数据必须小于todate
-                                     todate=datetime.datetime(2025, 11, 1),
+                                     todate=datetime.datetime(2025, 10, 31),
                                      reverse=False)
     # feed = bt.feeds.GenericCSVData(dataname = data_path,**data_kwargs)
     cerebro.adddata(feed, name="sz")
@@ -226,15 +217,17 @@ def run():
                                      # 数据必须大于fromdate
                                      fromdate=datetime.datetime(2024, 11, 26),
                                      # 数据必须小于todate
-                                     todate=datetime.datetime(2025, 11, 1),
+                                     todate=datetime.datetime(2025, 10, 31),
                                      reverse=False)
     # feed = bt.feeds.GenericCSVData(dataname = data_path,**data_kwargs)
     cerebro.adddata(feed, name="cy")
 
     # 设置初始资金
     cerebro.broker.setcash(50000.0)
+
     # 添加手续费，按照万分之二收取，频繁交易，加上手续费亏的很惨，这里先忽略手续费
-    cerebro.broker.setcommission(commission=0.0002, stocklike=True)
+    # cerebro.broker.setcommission(commission=0.0002, stocklike=True)
+    cerebro.broker.setcommission(commission=0.00001)
 
     cerebro.addstrategy(ETFStrategy)
     # cerebro.addanalyzer(bt.analyzers.TotalValue, _name='my_value')
@@ -265,12 +258,13 @@ def run():
 if __name__ == "__main__":
     results = run()
 
-    pyfoliozer = results[0].analyzers.getbyname('pyfolio')
-    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
-    pf.create_full_tear_sheet(
-        returns,
-        positions=positions,
-        transactions=transactions,
-        gross_lev=gross_lev,
-        live_start_date='2024-11-06',
-    )
+    # pyfoliozer = results[0].analyzers.getbyname('pyfolio')
+    # returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    # pf.create_full_tear_sheet(
+    #     returns,
+    #     positions=positions,
+    #     transactions=transactions,
+    #     # gross_lev=gross_lev,
+    #     live_start_date='2025-09-01',
+    #     round_trips=True
+    # )
